@@ -10,8 +10,12 @@
 		0109A0141B7C9CAC0015EDE6 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0109A0131B7C9CAC0015EDE6 /* AppDelegate.m */; };
 		0109A0161B7C9CAC0015EDE6 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0109A0151B7C9CAC0015EDE6 /* main.m */; };
 		0109A0181B7C9CAC0015EDE6 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0109A0171B7C9CAC0015EDE6 /* Images.xcassets */; };
-		0109A01B1B7C9CAC0015EDE6 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0109A0191B7C9CAC0015EDE6 /* MainMenu.xib */; };
 		0109A0271B7C9CAC0015EDE6 /* PhabNotifyTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0109A0261B7C9CAC0015EDE6 /* PhabNotifyTests.m */; };
+		01754A931B82116300B37297 /* PreferencesViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 01754A911B82116300B37297 /* PreferencesViewController.xib */; };
+		01754AA11B84407600B37297 /* phab24.png in Resources */ = {isa = PBXBuildFile; fileRef = 01754AA01B84407600B37297 /* phab24.png */; };
+		01754AA81B844CF400B37297 /* PreferencesViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 01754AA71B844CF400B37297 /* PreferencesViewController.m */; };
+		01754AAC1B84677B00B37297 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 01754AAB1B84677B00B37297 /* MainMenu.xib */; };
+		01754ADB1B846ACD00B37297 /* PhabricatorConduit.m in Sources */ = {isa = PBXBuildFile; fileRef = 01754ADA1B846ACD00B37297 /* PhabricatorConduit.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -31,10 +35,17 @@
 		0109A0131B7C9CAC0015EDE6 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
 		0109A0151B7C9CAC0015EDE6 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		0109A0171B7C9CAC0015EDE6 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
-		0109A01A1B7C9CAC0015EDE6 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		0109A0201B7C9CAC0015EDE6 /* PhabNotifyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PhabNotifyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0109A0251B7C9CAC0015EDE6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0109A0261B7C9CAC0015EDE6 /* PhabNotifyTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PhabNotifyTests.m; sourceTree = "<group>"; };
+		01754A911B82116300B37297 /* PreferencesViewController.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = PreferencesViewController.xib; sourceTree = "<group>"; };
+		01754AA01B84407600B37297 /* phab24.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = phab24.png; sourceTree = "<group>"; };
+		01754AA61B844CF400B37297 /* PreferencesViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PreferencesViewController.h; sourceTree = "<group>"; };
+		01754AA71B844CF400B37297 /* PreferencesViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PreferencesViewController.m; sourceTree = "<group>"; };
+		01754AA91B84615D00B37297 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
+		01754AAB1B84677B00B37297 /* MainMenu.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = MainMenu.xib; sourceTree = "<group>"; };
+		01754AD91B846ACD00B37297 /* PhabricatorConduit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhabricatorConduit.h; sourceTree = "<group>"; };
+		01754ADA1B846ACD00B37297 /* PhabricatorConduit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhabricatorConduit.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +69,7 @@
 		0109A0041B7C9CAC0015EDE6 = {
 			isa = PBXGroup;
 			children = (
+				01754AA91B84615D00B37297 /* Foundation.framework */,
 				0109A00F1B7C9CAC0015EDE6 /* PhabNotify */,
 				0109A0231B7C9CAC0015EDE6 /* PhabNotifyTests */,
 				0109A00E1B7C9CAC0015EDE6 /* Products */,
@@ -78,9 +90,15 @@
 			children = (
 				0109A0121B7C9CAC0015EDE6 /* AppDelegate.h */,
 				0109A0131B7C9CAC0015EDE6 /* AppDelegate.m */,
+				01754AA61B844CF400B37297 /* PreferencesViewController.h */,
+				01754AA71B844CF400B37297 /* PreferencesViewController.m */,
+				01754AD91B846ACD00B37297 /* PhabricatorConduit.h */,
+				01754ADA1B846ACD00B37297 /* PhabricatorConduit.m */,
+				01754A911B82116300B37297 /* PreferencesViewController.xib */,
+				01754AAB1B84677B00B37297 /* MainMenu.xib */,
 				0109A0171B7C9CAC0015EDE6 /* Images.xcassets */,
-				0109A0191B7C9CAC0015EDE6 /* MainMenu.xib */,
 				0109A0101B7C9CAC0015EDE6 /* Supporting Files */,
+				01754AA31B8441DD00B37297 /* Icons */,
 			);
 			path = PhabNotify;
 			sourceTree = "<group>";
@@ -109,6 +127,14 @@
 				0109A0251B7C9CAC0015EDE6 /* Info.plist */,
 			);
 			name = "Supporting Files";
+			sourceTree = "<group>";
+		};
+		01754AA31B8441DD00B37297 /* Icons */ = {
+			isa = PBXGroup;
+			children = (
+				01754AA01B84407600B37297 /* phab24.png */,
+			);
+			name = Icons;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -191,8 +217,10 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				01754A931B82116300B37297 /* PreferencesViewController.xib in Resources */,
 				0109A0181B7C9CAC0015EDE6 /* Images.xcassets in Resources */,
-				0109A01B1B7C9CAC0015EDE6 /* MainMenu.xib in Resources */,
+				01754AA11B84407600B37297 /* phab24.png in Resources */,
+				01754AAC1B84677B00B37297 /* MainMenu.xib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -210,8 +238,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				01754ADB1B846ACD00B37297 /* PhabricatorConduit.m in Sources */,
 				0109A0161B7C9CAC0015EDE6 /* main.m in Sources */,
 				0109A0141B7C9CAC0015EDE6 /* AppDelegate.m in Sources */,
+				01754AA81B844CF400B37297 /* PreferencesViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -232,17 +262,6 @@
 			targetProxy = 0109A0211B7C9CAC0015EDE6 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
-
-/* Begin PBXVariantGroup section */
-		0109A0191B7C9CAC0015EDE6 /* MainMenu.xib */ = {
-			isa = PBXVariantGroup;
-			children = (
-				0109A01A1B7C9CAC0015EDE6 /* Base */,
-			);
-			name = MainMenu.xib;
-			sourceTree = "<group>";
-		};
-/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		0109A0281B7C9CAC0015EDE6 /* Debug */ = {
@@ -401,6 +420,7 @@
 				0109A02C1B7C9CAC0015EDE6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		0109A02D1B7C9CAC0015EDE6 /* Build configuration list for PBXNativeTarget "PhabNotifyTests" */ = {
 			isa = XCConfigurationList;
@@ -409,6 +429,7 @@
 				0109A02F1B7C9CAC0015EDE6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
