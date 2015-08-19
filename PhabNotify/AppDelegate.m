@@ -45,7 +45,7 @@ NSString* lastSeenFeedID;
     
     statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:-2];
     [statusItem setImage:statusIcon];
-    [statusItem.button setAction:@selector(togglePreferences:)];
+    [statusItem.button setAction:@selector(statusItemClicked:)];
 
     // set up popover for configuration
     popover = [[NSPopover alloc] init];
@@ -85,6 +85,16 @@ NSString* lastSeenFeedID;
     notification.deliveryDate = [NSDate dateWithTimeIntervalSinceNow:0];
     notification.userInfo = userInfo;
     [[NSUserNotificationCenter defaultUserNotificationCenter] scheduleNotification:notification];
+}
+
+- (void)statusItemClicked:(id)sender {
+    NSEvent* event = [NSApp currentEvent];
+    if ([event modifierFlags] & NSCommandKeyMask) {
+        [[NSApplication sharedApplication] terminate:self];
+        return;
+    }
+    
+    [self togglePreferences:sender];
 }
 
 - (void)togglePreferences:(id)sender {
