@@ -14,3 +14,4 @@ hdiutil detach $DEV
 hdiutil convert PhabNotify_tmp.dmg -format UDZO -o PhabNotifyRO.dmg
 mv PhabNotifyRO.dmg PhabNotify.dmg
 rm PhabNotify_tmp.dmg
+echo "PhabNotify.dmg is ready"
