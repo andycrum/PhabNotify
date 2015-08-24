@@ -10,5 +10,6 @@
 @interface PhabricatorConduit : NSObject
 
 - (id)request: (NSString*)endpoint data: (NSString*)data error: (NSError**)error;
+- (NSDictionary*)getUserByPhid: (NSString*)phid Error: (NSError**)error;
 
 @end

@@ -46,4 +46,20 @@
     return responseObject[@"result"];
 }
 
+- (NSDictionary*)getUserByPhid: (NSString*)phid Error: (NSError**)error {
+    id object = [self request:@"user.query" data:[NSString stringWithFormat:@"phids[0]=%@", phid] error:error];
+    
+    if(*error) {
+        return nil;
+    }
+    
+    if(![object isKindOfClass:[NSArray class]])
+    {
+        return nil;
+    }
+    
+    NSArray *results = object;
+    return [results objectAtIndex:0];
+}
+
 @end

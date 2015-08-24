@@ -24,10 +24,9 @@ id mouseEventMonitor = nil;
 
 // api data
 PhabricatorConduit* conduit;
-bool lookingForNewDiffs = false;
-NSTimer* newDiffsTimer = nil;
+NSTimer* updatesTimer = nil;
+bool updatingDiffList = false;
 bool lookingForDiffChanges = false;
-NSTimer* diffChangesTimer = nil;
 NSString* conduitPhid;
 NSString* conduitUsername;
 NSString* conduitRealName;
@@ -120,17 +119,12 @@ NSString* lastSeenFeedID;
         
         [self intializeKnownDiffs];
         
-        newDiffsTimer = [NSTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(lookForNewDiffs) userInfo:nil repeats:true];
-        diffChangesTimer = [NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(lookForDiffChanges) userInfo:nil repeats:true];
+        updatesTimer = [NSTimer scheduledTimerWithTimeInterval:2 target:self selector:@selector(lookForUpdates) userInfo:nil repeats:true];
     } else {
-        if (newDiffsTimer) {
-            [newDiffsTimer invalidate];
+        if (updatesTimer) {
+            [updatesTimer invalidate];
         }
         
-        if (diffChangesTimer) {
-            [diffChangesTimer invalidate];
-        }
-
         [preferencesController.statusLabel setStringValue:@"Not connected"];
         [preferencesController.statusLabel setTextColor:[NSColor redColor]];
         
@@ -138,6 +132,11 @@ NSString* lastSeenFeedID;
             [self togglePreferences:nil];
         }
     }
+}
+
+- (void)lookForUpdates {
+    [self updateDiffList];
+    [self lookForDiffChanges];
 }
 
 - (bool)loadUserInfo {
@@ -183,61 +182,29 @@ NSString* lastSeenFeedID;
     }
 }
 
-- (void)lookForNewDiffs {
-    if (lookingForNewDiffs) {
+- (void)updateDiffList {
+    if (updatingDiffList) {
         return;
     }
     
-    lookingForNewDiffs = true;
+    updatingDiffList = true;
     
     NSMutableDictionary* latestDiffs = [[NSMutableDictionary alloc] init];
     NSArray* openDiffs = [self getOpenDiffs];
     if (!openDiffs) {
-        lookingForNewDiffs = false;
+        updatingDiffList = false;
         return;
     }
     
     for (NSDictionary* diff in openDiffs) {
         [latestDiffs setObject:diff forKey:diff[@"phid"]];
         
-        if ([knownDiffs objectForKey:diff[@"phid"]] != nil) {
-            continue;
-        }
-        
-        if ([diff[@"authorPHID"] isEqualToString:conduitPhid]) {
-            continue;
-        }
-        
-        NSDictionary* user = [self findUser: diff[@"authorPHID"]];
-        if (!user) {
-            continue;
-        }
-        
-        NSString* title = [NSString stringWithFormat:@"New diff from %@: D%@", user[@"userName"], diff[@"id"]];
-        NSString* details = [NSString stringWithFormat:@"%@", diff[@"title"]];
-        NSDictionary* userInfo = @{@"url": diff[@"uri"]};
-        [self sendNotificationWithTitle:title Details:details UserInfo:userInfo];
+        [self testForCreatedDiff:diff];
+        [self testForAcceptedDiff:diff];
     }
     
     knownDiffs = latestDiffs;
-    lookingForNewDiffs = false;
-}
-
-- (NSDictionary*)findUser:(NSString*) phid {
-    NSError* error = nil;
-    id object = [conduit request:@"user.query" data:[NSString stringWithFormat:@"phids[0]=%@", phid] error:&error];
-
-    if(error) {
-        return nil;
-    }
-    
-    if(![object isKindOfClass:[NSArray class]])
-    {
-        return nil;
-    }
-
-    NSArray *results = object;
-    return [results objectAtIndex:0];
+    updatingDiffList = false;
 }
 
 - (void)lookForDiffChanges {
@@ -246,10 +213,10 @@ NSString* lastSeenFeedID;
     }
     
     lookingForDiffChanges = true;
-
-    // prob less than 10 changes per second
+    
+    // prob less than 10 changes per refresh
     NSString* requestData = @"limit=10";
-
+    
     int index = 0;
     for (NSString* key in knownDiffs) {
         if (![knownDiffs[key][@"authorPHID"] isEqualToString:conduitPhid]) {
@@ -260,7 +227,7 @@ NSString* lastSeenFeedID;
         requestData = [NSString stringWithFormat:@"%@&filterPHIDs[%d]=%@", requestData, index, key];
         index++;
     }
-
+    
     // we have no open diffs
     if (index == 0) {
         lookingForDiffChanges = false;
@@ -280,9 +247,10 @@ NSString* lastSeenFeedID;
         lookingForDiffChanges = false;
         return;
     }
-
-    NSDictionary* feeds = object;
-    NSArray* sortedKeys = [feeds keysSortedByValueUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+    
+    // restore chronological sorting
+    NSDictionary* feed = object;
+    NSArray* sortedKeys = [feed keysSortedByValueUsingComparator:^NSComparisonResult(id obj1, id obj2) {
         NSDictionary* dict1 = obj1;
         NSDictionary* dict2 = obj2;
         NSComparisonResult res = [dict1[@"chronologicalKey"] compare:dict2[@"chronologicalKey"] options:NSNumericSearch];
@@ -291,8 +259,9 @@ NSString* lastSeenFeedID;
     }];
     
     if (!lastSeenFeedID) {
+        // first feed call
         NSString* firstKey = [[sortedKeys reverseObjectEnumerator] nextObject];
-        NSDictionary* firstItem = feeds[firstKey];
+        NSDictionary* firstItem = feed[firstKey];
         lastSeenFeedID = firstItem[@"chronologicalKey"];
         lookingForDiffChanges = false;
         
@@ -301,39 +270,112 @@ NSString* lastSeenFeedID;
     
     NSString* latestSeenFeedID = nil;
     for (NSString* key in [sortedKeys reverseObjectEnumerator]) {
-        NSDictionary* feed = feeds[key];
-        if ([feed[@"chronologicalKey"] isEqualToString:lastSeenFeedID]) {
+        NSDictionary* event = feed[key];
+        if ([event[@"chronologicalKey"] isEqualToString:lastSeenFeedID]) {
             break;
         }
         
         if (!latestSeenFeedID) {
-            latestSeenFeedID = feed[@"chronologicalKey"];
+            latestSeenFeedID = event[@"chronologicalKey"];
         }
         
-        if ([feed[@"authorPHID"] isEqualToString:conduitPhid]) {
-            continue;
-        }
-        
-        NSDictionary* diff = [knownDiffs objectForKey:feed[@"data"][@"objectPHID"]];
-        if (!diff) {
-            continue;
-        }
-        
-        NSDictionary* user = [self findUser:feed[@"authorPHID"]];
-        if (!user) {
-            continue;
-        }
-        
-        NSString* title = [NSString stringWithFormat:@"%@ reviewed D%@", user[@"userName"], diff[@"id"]];
-        NSString* details = diff[@"title"];
-        NSDictionary* userInfo = @{@"url": diff[@"uri"]};
-        [self sendNotificationWithTitle:title Details:details UserInfo:userInfo];
+        [self testForReviewedEvent:event];
     }
-
+    
     if (latestSeenFeedID) {
         lastSeenFeedID = latestSeenFeedID;
     }
+    
     lookingForDiffChanges = false;
+}
+
+- (void)testForCreatedDiff:(NSDictionary*) diff {
+    if ([knownDiffs objectForKey:diff[@"phid"]] != nil) {
+        // already exists
+        return;
+    }
+
+    if ([diff[@"authorPHID"] isEqualToString:conduitPhid]) {
+        // created by this user
+        return;
+    }
+    
+    NSError* error;
+    NSDictionary* user = [conduit getUserByPhid:diff[@"authorPHID"] Error:&error];
+    if (error) {
+        // networking error
+        return;
+    }
+    
+    if (!user) {
+        // failed to look up user info
+        return;
+    }
+    
+    NSString* title = [NSString stringWithFormat:@"New diff from %@: D%@", user[@"userName"], diff[@"id"]];
+    NSString* details = [NSString stringWithFormat:@"%@", diff[@"title"]];
+    NSDictionary* userInfo = @{@"url": diff[@"uri"]};
+    [self sendNotificationWithTitle:title Details:details UserInfo:userInfo];
+}
+
+- (void)testForAcceptedDiff:(NSDictionary*) diff {
+    if ([knownDiffs objectForKey:diff[@"phid"]] == nil) {
+        // new diff
+        return;
+    }
+    
+    if (![diff[@"authorPHID"] isEqualToString:conduitPhid]) {
+        // not created by this user
+        return;
+    }
+    
+    if ([[knownDiffs[diff[@"phid"]] objectForKey:@"statusName"] isEqualToString:@"Accepted"]) {
+        // already accepted
+        return;
+    }
+    
+    if (![[diff objectForKey:@"statusName"] isEqualToString:@"Accepted"]) {
+        // not entering accepted status
+        return;
+    }
+    
+    NSString* title = [NSString stringWithFormat:@"D%@ was accepted", diff[@"id"]];
+    NSString* details = [NSString stringWithFormat:@"%@", diff[@"title"]];
+    NSDictionary* userInfo = @{@"url": diff[@"uri"]};
+    [self sendNotificationWithTitle:title Details:details UserInfo:userInfo];
+}
+
+- (void)testForReviewedEvent: (NSDictionary*)event {
+    if ([event[@"authorPHID"] isEqualToString:conduitPhid]) {
+        // current user performed action
+        return;
+    }
+    
+    NSDictionary* diff = [knownDiffs objectForKey:event[@"data"][@"objectPHID"]];
+    if (!diff) {
+        // not an object we care about
+        return;
+    }
+    
+    if ([diff[@"statusName"] isEqualToString:@"Accepted"]) {
+        // skip accepted
+        return;
+    }
+    
+    NSError* error = nil;
+    NSDictionary* user = [conduit getUserByPhid:event[@"authorPHID"] Error:&error];
+    if (error) {
+        return;
+    }
+    
+    if (!user) {
+        return;
+    }
+    
+    NSString* title = [NSString stringWithFormat:@"%@ reviewed D%@", user[@"userName"], diff[@"id"]];
+    NSString* details = diff[@"title"];
+    NSDictionary* userInfo = @{@"url": diff[@"uri"]};
+    [self sendNotificationWithTitle:title Details:details UserInfo:userInfo];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
