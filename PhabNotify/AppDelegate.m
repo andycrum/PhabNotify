@@ -38,11 +38,11 @@ NSString* lastSeenFeedID;
     [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:self];
     
     // set up our status item
-    NSString* iconPath = @"phab24.png";
+    NSString* iconPath = @"phab-menu-icon";
     NSImage* statusIcon = [NSImage imageNamed:iconPath];
     [statusIcon setTemplate:YES];
     
-    statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:-2];
+    statusItem = [[NSStatusBar systemStatusBar] statusItemWithLength:NSVariableStatusItemLength];
     [statusItem setImage:statusIcon];
     [statusItem.button setAction:@selector(statusItemClicked:)];
 
