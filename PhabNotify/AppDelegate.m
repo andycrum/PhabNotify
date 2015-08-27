@@ -246,7 +246,7 @@ NSString* lastSeenFeedID;
         // no results
         lookingForDiffChanges = false;
         return;
-    }
+    }   
     
     // restore chronological sorting
     NSDictionary* feed = object;
@@ -267,10 +267,17 @@ NSString* lastSeenFeedID;
         
         return;
     }
-    
+
     NSString* latestSeenFeedID = nil;
     for (NSString* key in [sortedKeys reverseObjectEnumerator]) {
         NSDictionary* event = feed[key];
+
+        // if event is older than last seen event, ignore
+        if ([event[@"chronologicalKey"] compare:lastSeenFeedID options:NSNumericSearch] == NSOrderedAscending) {
+            break;
+        }
+
+        // if we've already seen the event, ignore
         if ([event[@"chronologicalKey"] isEqualToString:lastSeenFeedID]) {
             break;
         }
