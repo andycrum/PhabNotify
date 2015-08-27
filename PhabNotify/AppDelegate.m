@@ -246,7 +246,7 @@ NSString* lastSeenFeedID;
         // no results
         lookingForDiffChanges = false;
         return;
-    }   
+    }
     
     // restore chronological sorting
     NSDictionary* feed = object;
